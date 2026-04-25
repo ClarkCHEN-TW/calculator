@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="貸款試算">
+<meta name="description" content="完整貸款總費用率計算機，支援房貸、車貸、企業貸款、個人信貸">
+<title>貸款總費用率計算機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface2: #f9fafb;
+  --surface3: #f0f2f5;
+  --border: #e4e7ec;
+  --border2: #d0d5dd;
+  --accent: #1d6b4a;
+  --accent-light: #e8f5ef;
+  --accent-mid: #c3e5d4;
+  --accent-text: #155c3e;
+  --sky: #0077b6;
+  --sky-bg: #e8f4fc;
+  --violet: #6941c6;
+  --violet-bg: #f4f3ff;
+  --red: #c0392b;
+  --red-bg: #fef2f2;
+  --amber: #b45309;
+  --amber-bg: #fffbeb;
+  --text: #101828;
+  --text2: #344054;
+  --muted: #667085;
+  --muted2: #98a2b3;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
+  --shadow: 0 1px 3px rgba(16,24,40,0.1), 0 1px 2px rgba(16,24,40,0.06);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  padding-bottom: max(env(safe-area-inset-bottom), 24px);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.header {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 18px 12px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.app-name {
+  font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 7px;
+}
+.app-name .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); display: inline-block;
+}
+.install-btn {
+  background: var(--accent-light); border: 1px solid var(--accent-mid);
+  color: var(--accent-text); padding: 6px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit; letter-spacing: 0.2px; transition: all 0.15s;
+}
+.install-btn:hover { background: var(--accent-mid); }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 6px; padding: 10px 16px;
+  overflow-x: auto; scrollbar-width: none;
+  background: #fff; border-bottom: 1px solid var(--border);
+  position: sticky; top: 51px; z-index: 99;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; padding: 7px 14px;
+  border-radius: 20px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted);
+  transition: all 0.15s; font-family: inherit;
+}
+.tab.active {
+  background: var(--accent-light); border-color: var(--accent-mid);
+  color: var(--accent-text); font-weight: 600;
+}
+
+/* ── MAIN ── */
+.main { padding: 16px 14px 24px; max-width: 500px; margin: 0 auto; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--muted2);
+  margin: 20px 0 8px 2px;
+}
+.section-label:first-child { margin-top: 4px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px; margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+}
+.card-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.1px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 7px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.card-title .icon { font-size: 13px; }
+
+/* ── FIELD ── */
+.field { margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  margin-bottom: 7px; display: flex;
+  justify-content: space-between; align-items: center;
+}
+.field-label .badge {
+  font-size: 10px; background: var(--surface3);
+  border: 1px solid var(--border); color: var(--muted);
+  padding: 2px 7px; border-radius: 10px; font-weight: 500;
+}
+
+/* ── INPUT ROW ── */
+.input-row {
+  display: flex; align-items: center;
+  background: var(--surface); border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm); overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-row:focus-within {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,107,74,0.1);
+}
+.input-row input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text); font-size: 16px;
+  font-family: 'DM Mono', monospace; font-weight: 500;
+  padding: 10px 13px; width: 100%; -webkit-appearance: none;
+}
+.input-row .unit {
+  padding: 0 12px; color: var(--muted); font-size: 13px;
+  white-space: nowrap; flex-shrink: 0; font-weight: 500;
+  border-left: 1px solid var(--border); background: var(--surface2);
+  align-self: stretch; display: flex; align-items: center;
+}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* ── SPLIT INPUT ── */
+.split-input { display: flex; gap: 8px; align-items: center; }
+.split-input .or { color: var(--muted2); font-size: 12px; flex-shrink: 0; }
+
+/* ── SEGMENT ── */
+.segment {
+  display: flex; background: var(--surface3);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 3px; gap: 2px;
+}
+.seg-btn {
+  flex: 1; padding: 8px 4px; border-radius: 6px;
+  border: none; background: none; color: var(--muted);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all 0.15s; font-family: inherit; text-align: center;
+}
+.seg-btn.active {
+  background: #fff; color: var(--accent); font-weight: 600;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+}
+
+/* ── SLIDER ── */
+input[type=range] {
+  width: 100%; -webkit-appearance: none; appearance: none;
+  height: 4px; background: var(--border); border-radius: 2px;
+  outline: none; margin: 6px 0;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--accent); cursor: pointer;
+  border: 2px solid #fff; box-shadow: 0 0 0 2px var(--accent-mid), var(--shadow-sm);
+}
+.range-labels {
+  display: flex; justify-content: space-between;
+  font-size: 10.5px; color: var(--muted2); margin-top: 2px;
+}
+.range-val {
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  color: var(--accent); font-weight: 500;
+  background: var(--accent-light); padding: 1px 7px;
+  border-radius: 10px; border: 1px solid var(--accent-mid);
+}
+
+/* ── DIVIDER ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* ── HINT ── */
+.hint { font-size: 11px; color: var(--muted2); margin-top: 5px; line-height: 1.5; }
+
+/* ── RESULTS ── */
+.results-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  margin-bottom: 8px; box-shadow: var(--shadow);
+}
+.results-top {
+  background: linear-gradient(135deg, var(--accent) 0%, #25a26b 100%);
+  padding: 22px 20px 18px;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.results-card { animation: fadeUp 0.25s ease; }
+
+.apr-block { margin-bottom: 14px; }
+.apr-label {
+  font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: rgba(255,255,255,0.7); font-weight: 700; margin-bottom: 4px;
+}
+.apr-value {
+  font-family: 'DM Mono', monospace; font-size: 54px;
+  font-weight: 500; color: #fff; line-height: 1;
+}
+.apr-value .pct { font-size: 26px; margin-left: 2px; opacity: 0.8; }
+.apr-sub { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 6px; }
+
+.monthly-row {
+  background: rgba(255,255,255,0.15); border-radius: 9px;
+  padding: 11px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.monthly-row .lbl { font-size: 13px; color: rgba(255,255,255,0.8); }
+.monthly-row .lbl .sub { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.monthly-row .val {
+  font-family: 'DM Mono', monospace; font-size: 22px;
+  font-weight: 500; color: #fff;
+}
+
+.results-body { padding: 16px 18px; }
+
+/* ── COST BAR ── */
+.cost-bar-wrap { margin: 4px 0 12px; }
+.cost-bar {
+  height: 7px; background: var(--surface3); border-radius: 4px;
+  overflow: hidden; display: flex;
+}
+.bar-p { background: var(--sky); transition: width 0.4s; }
+.bar-i { background: var(--red); opacity: 0.9; transition: width 0.4s; }
+.bar-f { background: var(--violet); opacity: 0.9; transition: width 0.4s; }
+.bar-legend {
+  display: flex; gap: 14px; font-size: 10.5px; color: var(--muted);
+  margin-top: 7px;
+}
+.legend-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; margin-right: 4px; vertical-align: middle;
+}
+
+/* ── BREAKDOWN GRID ── */
+.breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.bk {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 9px; padding: 11px 13px;
+}
+.bk .bk-label { font-size: 10.5px; color: var(--muted); margin-bottom: 4px; }
+.bk .bk-val {
+  font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500;
+  color: var(--text);
+}
+.bk.total { background: var(--accent-light); border-color: var(--accent-mid); }
+.bk.total .bk-val { color: var(--accent-text); }
+.bk.interest .bk-val { color: var(--red); }
+.bk.fees .bk-val { color: var(--violet); }
+.bk.principal .bk-val { color: var(--sky); }
+
+/* ── INFO BOXES ── */
+.grace-box {
+  background: var(--amber-bg); border: 1px solid #fde68a;
+  border-radius: 9px; padding: 10px 13px; margin-top: 12px;
+  font-size: 12px; color: var(--amber); line-height: 1.5;
+}
+.floating-box {
+  background: var(--sky-bg); border: 1px solid #bae6fd;
+  border-radius: 9px; padding: 10px 13px; margin-top: 12px;
+  font-size: 12px; color: var(--sky); line-height: 1.5;
+}
+
+/* ── TOGGLE HEADER ── */
+.toggle-header {
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 8px;
+  font-size: 14px; font-weight: 500; user-select: none;
+  color: var(--text2); box-shadow: var(--shadow-sm);
+  transition: background 0.15s;
+}
+.toggle-header:hover { background: var(--surface2); }
+.toggle-header .arrow {
+  color: var(--muted); font-size: 11px;
+  transition: transform 0.2s; display: inline-block;
+}
+.toggle-header.open .arrow { transform: rotate(180deg); }
+.collapsible { display: none; }
+.collapsible.open { display: block; }
+
+/* ── AMORT TABLE ── */
+.table-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+}
+.table-scroll { overflow-x: auto; }
+.amort-table {
+  width: 100%; border-collapse: collapse;
+  font-family: 'DM Mono', monospace; font-size: 11.5px;
+  min-width: 380px;
+}
+.amort-table th {
+  background: var(--surface3); color: var(--muted);
+  padding: 10px 10px; text-align: right;
+  font-size: 10px; letter-spacing: 0.5px;
+  font-family: 'Noto Sans TC', sans-serif; font-weight: 600;
+  white-space: nowrap; border-bottom: 1px solid var(--border);
+}
+.amort-table th:first-child { text-align: center; }
+.amort-table td {
+  padding: 8px 10px; text-align: right;
+  border-bottom: 1px solid var(--border); color: var(--text2);
+}
+.amort-table td:first-child { text-align: center; color: var(--muted); font-size: 11px; }
+.amort-table tr:last-child td { border-bottom: none; }
+.amort-table tr.grace-row td { color: var(--amber); }
+.amort-table tr.last-row td { color: var(--accent); font-weight: 600; }
+.interest-col { color: var(--red) !important; }
+.fee-col { color: var(--violet) !important; }
+.principal-col { color: var(--sky) !important; }
+.show-more-btn {
+  width: 100%; padding: 11px; background: var(--surface2);
+  border: none; border-top: 1px solid var(--border);
+  color: var(--muted); font-size: 12px; font-weight: 500;
+  font-family: 'Noto Sans TC', sans-serif; cursor: pointer;
+  transition: background 0.15s;
+}
+.show-more-btn:hover { background: var(--surface3); color: var(--text2); }
+
+/* ── INSTALL GUIDE ── */
+.install-guide {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-top: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.install-guide h3 {
+  font-size: 14px; font-weight: 700; margin-bottom: 16px;
+  color: var(--text); display: flex; align-items: center; gap: 8px;
+}
+.steps { display: flex; flex-direction: column; gap: 12px; }
+.step { display: flex; gap: 12px; align-items: flex-start; }
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent-light); border: 1.5px solid var(--accent-mid);
+  color: var(--accent); font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+}
+.step-text { font-size: 13px; line-height: 1.6; color: var(--muted); padding-top: 2px; }
+.step-text strong { color: var(--text2); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(16,24,40,0.5);
+  z-index: 300; display: none; align-items: flex-end;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 20px 20px 0 0; padding: 0 20px;
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
+  width: 100%; max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 -4px 24px rgba(16,24,40,0.12);
+}
+.modal-handle {
+  width: 36px; height: 4px; background: var(--border);
+  border-radius: 2px; margin: 14px auto 18px;
+}
+.modal-title {
+  font-size: 17px; font-weight: 700; margin-bottom: 18px; color: var(--text);
+}
+
+/* ── UTILITY ── */
+.hidden { display: none !important; }
+.mt10 { margin-top: 10px; }
+.mt14 { margin-top: 14px; }
+.placeholder {
+  text-align: center; padding: 40px 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+}
+.placeholder .emoji { font-size: 36px; margin-bottom: 10px; }
+.placeholder p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+/* ── TYPE-SPECIFIC ── */
+.only-mortgage, .only-car, .only-biz { display: none; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-row">
+    <div class="app-name">
+      <span class="dot"></span>貸款試算
+    </div>
+    <button class="install-btn" onclick="openModal()">📲 安裝到手機</button>
+  </div>
+</div>
+
+<!-- LOAN TYPE TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="setType('mortgage',this)">🏠 房屋貸款</button>
+  <button class="tab" onclick="setType('car',this)">🚗 車&nbsp;貸</button>
+  <button class="tab" onclick="setType('business',this)">🏢 企業貸款</button>
+  <button class="tab" onclick="setType('personal',this)">💳 個人信貸</button>
+</div>
+
+<div class="main">
+
+  <!-- ─ SECTION 1: 基本設定 ─ -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span>基本設定</div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>貸款金額</span>
+        <span class="range-val" id="amount-label">500萬</span>
+      </div>
+      <input type="range" id="amount-slider" min="100000" max="50000000" step="100000" value="5000000"
+        oninput="onAmountSlider(this.value)">
+      <div class="range-labels"><span>10萬</span><span>5,000萬</span></div>
+      <div class="input-row mt10">
+        <input type="number" id="amount-input" value="5000000" placeholder="輸入金額"
+          oninput="onAmountInput(this.value)">
+        <span class="unit">元</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>貸款年限</span>
+        <span class="range-val" id="years-label">20年</span>
+      </div>
+      <input type="range" id="years-slider" min="1" max="40" step="1" value="20"
+        oninput="onYears(this.value)">
+      <div class="range-labels"><span>1年</span><span>40年</span></div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>年利率</span>
+        <span class="badge">影響總費用率</span>
+      </div>
+      <div class="input-row">
+        <input type="number" id="rate" value="2.5" step="0.01" oninput="calc()">
+        <span class="unit">% / 年</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">還款方式</div>
+      <div class="segment" id="seg-repay">
+        <button class="seg-btn active" onclick="setSeg('seg-repay','annuity',this)">等額本息</button>
+        <button class="seg-btn" onclick="setSeg('seg-repay','principal',this)">等額本金</button>
+        <button class="seg-btn" onclick="setSeg('seg-repay','bullet',this)">到期還款</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─ SECTION 2: 利率與寬限期 ─ -->
+  <div class="card">
+    <div class="card-title"><span class="icon">⚙️</span>利率與期間設定</div>
+
+    <div class="field">
+      <div class="field-label">利率類型</div>
+      <div class="segment" id="seg-rate-type">
+        <button class="seg-btn active" onclick="setSeg('seg-rate-type','fixed',this)">固定利率</button>
+        <button class="seg-btn" onclick="setSeg('seg-rate-type','floating',this)">機動利率</button>
+      </div>
+    </div>
+
+    <div class="field" id="floating-block" style="display:none">
+      <div class="field-label">
+        <span>預計年均調幅</span>
+        <span class="badge">試算用</span>
+      </div>
+      <div class="input-row">
+        <input type="number" id="rate-change" value="0.25" step="0.05" oninput="calc()">
+        <span class="unit">% 上浮</span>
+      </div>
+      <div class="hint">機動利率每段期間可能調整，此欄為試算估值，非實際承諾利率</div>
+    </div>
+
+    <div class="field" id="grace-block">
+      <div class="field-label">
+        <span>寬限期</span>
+        <span class="badge">僅付利息期間</span>
+      </div>
+      <div class="segment" id="seg-grace">
+        <button class="seg-btn active" onclick="setSeg('seg-grace',0,this)">無</button>
+        <button class="seg-btn" onclick="setSeg('seg-grace',12,this)">1年</button>
+        <button class="seg-btn" onclick="setSeg('seg-grace',24,this)">2年</button>
+        <button class="seg-btn" onclick="setSeg('seg-grace',36,this)">3年</button>
+      </div>
+      <div class="hint">寬限期間只還利息，到期後按剩餘年期重新攤還</div>
+    </div>
+  </div>
+
+  <!-- ─ SECTION 3: 費用明細 ─ -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon">💸</span>費用明細
+      <span style="font-size:10px;color:var(--muted2);text-transform:none;letter-spacing:0;font-weight:400;">（所有欄位均影響總費用率）</span>
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>開辦費 / 手續費</span><span class="badge">一次性</span>
+      </div>
+      <div class="split-input">
+        <div class="input-row" style="flex:1">
+          <input type="number" id="setup-pct" value="0" step="0.1" oninput="calc()">
+          <span class="unit">%</span>
+        </div>
+        <span class="or">或</span>
+        <div class="input-row" style="flex:1">
+          <input type="number" id="setup-amt" value="0" step="1000" oninput="calc()">
+          <span class="unit">元</span>
+        </div>
+      </div>
+      <div class="hint">%與固定金額，計算時取較大值</div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>帳管費</span><span class="badge">每月固定</span>
+      </div>
+      <div class="input-row">
+        <input type="number" id="mgmt-fee" value="0" step="50" oninput="calc()">
+        <span class="unit">元 / 月</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>徵信費</span><span class="badge">一次性</span>
+      </div>
+      <div class="input-row">
+        <input type="number" id="credit-fee" value="0" step="100" oninput="calc()">
+        <span class="unit">元</span>
+      </div>
+    </div>
+
+    <!-- ── 房貸專屬 ── -->
+    <div class="only-mortgage">
+      <hr class="divider">
+      <div class="card-title" style="margin-bottom:12px;border:none;padding-bottom:0"><span class="icon">🏠</span>房貸專屬費用</div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>設定費（抵押設定）</span><span class="badge">一次性</span>
+        </div>
+        <div class="split-input">
+          <div class="input-row" style="flex:1">
+            <input type="number" id="reg-pct" value="0.1" step="0.01" oninput="calc()">
+            <span class="unit">%</span>
+          </div>
+          <span class="or">或</span>
+          <div class="input-row" style="flex:1">
+            <input type="number" id="reg-amt" value="0" step="1000" oninput="calc()">
+            <span class="unit">元</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>代書費</span><span class="badge">一次性</span></div>
+        <div class="input-row">
+          <input type="number" id="notary-fee" value="5000" step="1000" oninput="calc()">
+          <span class="unit">元</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>鑑價費（房屋估價）</span><span class="badge">一次性</span></div>
+        <div class="input-row">
+          <input type="number" id="appraisal-fee" value="5000" step="1000" oninput="calc()">
+          <span class="unit">元</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>火災保險保費</span><span class="badge">每年</span></div>
+        <div class="input-row">
+          <input type="number" id="fire-ins" value="3000" step="500" oninput="calc()">
+          <span class="unit">元 / 年</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>地震險保費（住宅地震險）</span><span class="badge">每年</span></div>
+        <div class="input-row">
+          <input type="number" id="quake-ins" value="1350" step="100" oninput="calc()">
+          <span class="unit">元 / 年</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>壽險 / 信貸保險保費</span><span class="badge">每年（選填）</span></div>
+        <div class="input-row">
+          <input type="number" id="life-ins" value="0" step="1000" oninput="calc()">
+          <span class="unit">元 / 年</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 車貸專屬 ── -->
+    <div class="only-car">
+      <hr class="divider">
+      <div class="card-title" style="margin-bottom:12px;border:none;padding-bottom:0"><span class="icon">🚗</span>車貸專屬費用</div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>頭期款（自備款）</span>
+          <span class="badge">不計入貸款</span>
+        </div>
+        <div class="input-row">
+          <input type="number" id="down-payment" value="0" step="10000" oninput="calc()">
+          <span class="unit">元</span>
+        </div>
+        <div class="hint">頭期款不計入貸款本金，但顯示於總費用試算</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>汽車全險保費（若含於貸款費用）</span><span class="badge">每年</span></div>
+        <div class="input-row">
+          <input type="number" id="car-ins" value="0" step="1000" oninput="calc()">
+          <span class="unit">元 / 年</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 企業貸款專屬 ── -->
+    <div class="only-biz">
+      <hr class="divider">
+      <div class="card-title" style="margin-bottom:12px;border:none;padding-bottom:0"><span class="icon">🏢</span>企業貸款專屬費用</div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>保證金</span><span class="badge">一次性（到期退回）</span>
+        </div>
+        <div class="input-row">
+          <input type="number" id="guarantee" value="0" step="10000" oninput="calc()">
+          <span class="unit">元</span>
+        </div>
+        <div class="hint">保證金在資金成本計算中仍影響總費用率</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>擔保品鑑價費</span><span class="badge">一次性</span></div>
+        <div class="input-row">
+          <input type="number" id="biz-appraisal" value="0" step="1000" oninput="calc()">
+          <span class="unit">元</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>動用手續費（信用額度）</span><span class="badge">每次動用</span>
+        </div>
+        <div class="input-row">
+          <input type="number" id="drawdown-fee" value="0" step="0.01" oninput="calc()">
+          <span class="unit">% / 次</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span>保證人服務費</span><span class="badge">每年（選填）</span></div>
+        <div class="input-row">
+          <input type="number" id="guarantor-fee" value="0" step="1000" oninput="calc()">
+          <span class="unit">元 / 年</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 提前還款違約金 -->
+    <hr class="divider">
+    <div class="field">
+      <div class="field-label">
+        <span>提前還款違約金</span><span class="badge">參考用</span>
+      </div>
+      <div class="split-input">
+        <div class="input-row" style="flex:1">
+          <input type="number" id="prepay-pct" value="0" step="0.1" oninput="calc()">
+          <span class="unit">%</span>
+        </div>
+        <div class="input-row" style="flex:1.2">
+          <input type="number" id="prepay-years" value="3" step="1" oninput="calc()">
+          <span class="unit">年內收取</span>
+        </div>
+      </div>
+      <div class="hint">違約金不列入總費用率計算（為條件性費用，非固定支出）</div>
+    </div>
+  </div>
+
+  <!-- ─ RESULTS ─ -->
+  <div id="placeholder" class="placeholder">
+    <div class="emoji">📊</div>
+    <p>填入上方資訊後<br>系統將自動計算總費用率</p>
+  </div>
+
+  <div id="results-area" class="hidden">
+    <div class="results-card" id="results-card">
+      <div class="results-top">
+        <div class="apr-block">
+          <div class="apr-label">總費用年百分率（APR）</div>
+          <div class="apr-value"><span id="apr-val">—</span><span class="pct">%</span></div>
+          <div class="apr-sub" id="apr-sub">依金管會IRR法計算，含所有費用</div>
+        </div>
+        <div class="monthly-row">
+          <div class="lbl">
+            首期月付金
+            <div class="sub" id="monthly-sub">等額本息</div>
+          </div>
+          <div class="val" id="monthly-val">—</div>
+        </div>
+      </div>
+
+      <div class="results-body">
+        <div class="cost-bar-wrap">
+          <div class="cost-bar">
+            <div class="bar-p" id="bar-p" style="width:60%"></div>
+            <div class="bar-i" id="bar-i" style="width:30%"></div>
+            <div class="bar-f" id="bar-f" style="width:10%"></div>
+          </div>
+          <div class="bar-legend">
+            <span><span class="legend-dot" style="background:var(--sky)"></span>本金</span>
+            <span><span class="legend-dot" style="background:var(--red)"></span>總利息</span>
+            <span><span class="legend-dot" style="background:var(--violet)"></span>總費用</span>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <div class="bk principal">
+            <div class="bk-label">貸款本金</div>
+            <div class="bk-val" id="bk-principal">—</div>
+          </div>
+          <div class="bk interest">
+            <div class="bk-label">總利息支出</div>
+            <div class="bk-val" id="bk-interest">—</div>
+          </div>
+          <div class="bk fees">
+            <div class="bk-label">總費用（含保費）</div>
+            <div class="bk-val" id="bk-fees">—</div>
+          </div>
+          <div class="bk total">
+            <div class="bk-label">總還款+費用</div>
+            <div class="bk-val" id="bk-total">—</div>
+          </div>
+        </div>
+
+        <div class="grace-box hidden" id="grace-box">
+          ⏳ 寬限期 <strong id="grace-m">0</strong> 個月：月付利息 <strong id="grace-pay">0</strong> 元<br>
+          <span style="font-size:10.5px;opacity:0.8">寬限期結束後按剩餘 <span id="grace-remain">0</span> 個月重新攤還</span>
+        </div>
+
+        <div class="floating-box hidden" id="floating-box">
+          ⚠️ 機動利率提示：年利率每年預計上浮 <strong id="float-change">0</strong>%，<br>
+          實際利率由銀行按市場指標調整，此試算為估值
+        </div>
+
+        <div id="prepay-info" style="display:none;margin-top:12px;background:var(--red-bg);border:1px solid #fecaca;border-radius:9px;padding:10px 13px;font-size:12px;color:var(--red)">
+          ⚠️ 提前還款：<strong id="prepay-years-d">3</strong> 年內提前清償，需額外支付剩餘本金 <strong id="prepay-pct-d">0</strong>% 違約金
+        </div>
+      </div>
+    </div>
+
+    <!-- Amortization toggle -->
+    <div class="toggle-header" id="amort-toggle" onclick="toggleAmort()">
+      <span>📅 還款明細表（逐月）</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="collapsible" id="amort-panel">
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="amort-table">
+            <thead>
+              <tr>
+                <th>期數</th>
+                <th>月付金</th>
+                <th>本金</th>
+                <th>利息</th>
+                <th>費用</th>
+                <th>剩餘本金</th>
+              </tr>
+            </thead>
+            <tbody id="amort-body"></tbody>
+          </table>
+        </div>
+        <button class="show-more-btn" id="show-more-btn" onclick="showAllAmort()">
+          顯示全部 <span id="total-rows">0</span> 期 ↓
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─ INSTALL GUIDE ─ -->
+  <div class="install-guide">
+    <h3>📲 如何安裝到 iPhone</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">用 <strong>Safari</strong> 瀏覽器開啟此網頁（不支援 Chrome 安裝）</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">點底部工具列的 <strong>分享按鈕</strong>（□↑ 圖示）</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">向下滾動選單，找到 <strong>「加入主畫面」</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">右上角點 <strong>「新增」</strong>，完成！跟真正 App 一樣使用</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL MODAL -->
+<div class="modal-overlay" id="install-modal" onclick="onModalBg(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📲 安裝到 iPhone 主畫面</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">請用 <strong>Safari</strong> 開啟此頁面（iOS Chrome 不支援 PWA 安裝）</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">點畫面底部中間的 <strong>分享圖示</strong>（方框加向上箭頭）</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">在彈出選單中往下滑，找到並點選 <strong>「加入主畫面」</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">確認名稱後按右上角 <strong>「新增」</strong>，桌面就會出現 App 圖示</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px;background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:9px;font-size:12px;color:var(--accent-text);line-height:1.5">
+      💡 安裝後可離線使用，計算結果不會上傳，完全在你的裝置上執行
+    </div>
+    <button onclick="closeModal()" style="width:100%;margin-top:14px;padding:13px;background:var(--accent);border:none;border-radius:10px;font-size:15px;font-weight:700;color:#fff;font-family:inherit;cursor:pointer;transition:background 0.15s"
+      onmouseover="this.style.background='#155c3e'" onmouseout="this.style.background='var(--accent)'">
+      了解了
+    </button>
+  </div>
+</div>
+
+<script>
+const S = {
+  loanType: 'mortgage',
+  amount: 5000000,
+  years: 20,
+  rate: 2.5,
+  repay: 'annuity',
+  rateType: 'fixed',
+  rateChange: 0.25,
+  grace: 0,
+  setupPct: 0, setupAmt: 0,
+  mgmtFee: 0, creditFee: 0,
+  regPct: 0.1, regAmt: 0,
+  notaryFee: 5000, appraisalFee: 5000,
+  fireIns: 3000, quakeIns: 1350, lifeIns: 0,
+  downPayment: 0, carIns: 0,
+  guarantee: 0, bizAppraisal: 0,
+  drawdownFee: 0, guarantorFee: 0,
+  prepayPct: 0, prepayYears: 3,
+};
+
+let allAmortRows = [];
+let amortOpen = false;
+
+function setSeg(segId, value, btn) {
+  document.querySelectorAll('#' + segId + ' .seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (segId === 'seg-repay')     S.repay = value;
+  if (segId === 'seg-rate-type') {
+    S.rateType = value;
+    document.getElementById('floating-block').style.display = value === 'floating' ? '' : 'none';
+  }
+  if (segId === 'seg-grace')     S.grace = parseInt(value);
+  calc();
+}
+
+function setType(type, btn) {
+  S.loanType = type;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.only-mortgage').forEach(el => el.style.display = type === 'mortgage' ? '' : 'none');
+  document.querySelectorAll('.only-car').forEach(el => el.style.display = type === 'car' ? '' : 'none');
+  document.querySelectorAll('.only-biz').forEach(el => el.style.display = type === 'business' ? '' : 'none');
+  document.getElementById('grace-block').style.display =
+    (type === 'mortgage' || type === 'business') ? '' : 'none';
+  calc();
+}
+
+function onAmountSlider(v) {
+  S.amount = parseFloat(v);
+  document.getElementById('amount-input').value = v;
+  document.getElementById('amount-label').textContent = fmtWan(S.amount);
+  calc();
+}
+function onAmountInput(v) {
+  S.amount = parseFloat(v) || 0;
+  const slider = document.getElementById('amount-slider');
+  slider.value = Math.min(Math.max(S.amount, 100000), 50000000);
+  document.getElementById('amount-label').textContent = fmtWan(S.amount);
+  calc();
+}
+
+function onYears(v) {
+  S.years = parseInt(v);
+  document.getElementById('years-label').textContent = v + '年';
+  calc();
+}
+
+function readInputs() {
+  S.rate        = parseFloat(document.getElementById('rate').value) || 0;
+  S.rateChange  = parseFloat(document.getElementById('rate-change').value) || 0;
+  S.setupPct    = parseFloat(document.getElementById('setup-pct').value) || 0;
+  S.setupAmt    = parseFloat(document.getElementById('setup-amt').value) || 0;
+  S.mgmtFee     = parseFloat(document.getElementById('mgmt-fee').value) || 0;
+  S.creditFee   = parseFloat(document.getElementById('credit-fee').value) || 0;
+  S.prepayPct   = parseFloat(document.getElementById('prepay-pct').value) || 0;
+  S.prepayYears = parseFloat(document.getElementById('prepay-years').value) || 0;
+  if (S.loanType === 'mortgage') {
+    S.regPct       = parseFloat(document.getElementById('reg-pct').value) || 0;
+    S.regAmt       = parseFloat(document.getElementById('reg-amt').value) || 0;
+    S.notaryFee    = parseFloat(document.getElementById('notary-fee').value) || 0;
+    S.appraisalFee = parseFloat(document.getElementById('appraisal-fee').value) || 0;
+    S.fireIns      = parseFloat(document.getElementById('fire-ins').value) || 0;
+    S.quakeIns     = parseFloat(document.getElementById('quake-ins').value) || 0;
+    S.lifeIns      = parseFloat(document.getElementById('life-ins').value) || 0;
+  }
+  if (S.loanType === 'car') {
+    S.downPayment = parseFloat(document.getElementById('down-payment').value) || 0;
+    S.carIns      = parseFloat(document.getElementById('car-ins').value) || 0;
+  }
+  if (S.loanType === 'business') {
+    S.guarantee    = parseFloat(document.getElementById('guarantee').value) || 0;
+    S.bizAppraisal = parseFloat(document.getElementById('biz-appraisal').value) || 0;
+    S.drawdownFee  = parseFloat(document.getElementById('drawdown-fee').value) || 0;
+    S.guarantorFee = parseFloat(document.getElementById('guarantor-fee').value) || 0;
+  }
+}
+
+function getUpfrontFees() {
+  const p = S.amount;
+  let f = 0;
+  f += Math.max(p * S.setupPct / 100, S.setupAmt);
+  f += S.creditFee;
+  if (S.loanType === 'mortgage') {
+    f += Math.max(p * S.regPct / 100, S.regAmt);
+    f += S.notaryFee + S.appraisalFee;
+  }
+  if (S.loanType === 'business') {
+    f += S.bizAppraisal;
+    f += p * S.drawdownFee / 100;
+  }
+  return f;
+}
+
+function getAnnualRecurringFees() {
+  let f = 0;
+  if (S.loanType === 'mortgage') f += S.fireIns + S.quakeIns + S.lifeIns;
+  if (S.loanType === 'car')      f += S.carIns;
+  if (S.loanType === 'business') f += S.guarantorFee;
+  return f;
+}
+
+function getMonthlyFees() {
+  return S.mgmtFee + getAnnualRecurringFees() / 12;
+}
+
+function buildAmort() {
+  const p  = S.amount;
+  const n  = S.years * 12;
+  const r  = S.rate / 100 / 12;
+  const g  = S.grace;
+  const mf = getMonthlyFees();
+  const rows = [];
+  let balance = p;
+
+  if (S.repay === 'annuity') {
+    for (let i = 0; i < g; i++) {
+      const interest = balance * r;
+      rows.push({ period: i+1, payment: interest+mf, principal: 0, interest, fee: mf, balance, isGrace: true });
+    }
+    const rem = n - g;
+    const mp = (rem > 0 && r > 0)
+      ? balance * r * Math.pow(1+r, rem) / (Math.pow(1+r, rem) - 1)
+      : balance / rem;
+    for (let i = 0; i < rem; i++) {
+      const interest = balance * r;
+      const principal = mp - interest;
+      balance = Math.max(0, balance - principal);
+      rows.push({ period: g+i+1, payment: mp+mf, principal, interest, fee: mf, balance });
+    }
+  } else if (S.repay === 'principal') {
+    for (let i = 0; i < g; i++) {
+      const interest = balance * r;
+      rows.push({ period: i+1, payment: interest+mf, principal: 0, interest, fee: mf, balance, isGrace: true });
+    }
+    const rem = n - g;
+    const pp = balance / rem;
+    for (let i = 0; i < rem; i++) {
+      const interest = balance * r;
+      const payment = pp + interest;
+      balance = Math.max(0, balance - pp);
+      rows.push({ period: g+i+1, payment: payment+mf, principal: pp, interest, fee: mf, balance });
+    }
+  } else {
+    const interest = balance * r;
+    for (let i = 0; i < n-1; i++) {
+      rows.push({ period: i+1, payment: interest+mf, principal: 0, interest, fee: mf, balance });
+    }
+    rows.push({ period: n, payment: interest+balance+mf, principal: balance, interest, fee: mf, balance: 0, isLast: true });
+  }
+  return rows;
+}
+
+function calcAPR(netLoan, cashflows) {
+  if (netLoan <= 0 || cashflows.length === 0) return 0;
+  let r = S.rate / 100 / 12;
+  if (r <= 0) r = 0.002;
+  for (let iter = 0; iter < 300; iter++) {
+    let f = -netLoan, df = 0;
+    for (let t = 0; t < cashflows.length; t++) {
+      const disc = Math.pow(1 + r, t + 1);
+      f  += cashflows[t] / disc;
+      df -= (t + 1) * cashflows[t] / (disc * (1 + r));
+    }
+    if (Math.abs(df) < 1e-12) break;
+    const rNew = r - f / df;
+    if (!isFinite(rNew) || rNew < 0) break;
+    if (Math.abs(rNew - r) < 1e-10) { r = rNew; break; }
+    r = rNew;
+  }
+  return Math.max(0, r * 12 * 100);
+}
+
+function fmtWan(v) {
+  v = Math.round(parseFloat(v) || 0);
+  if (v >= 100000000) return (v/100000000).toFixed(1) + '億';
+  if (v >= 10000)     return Math.round(v/10000) + '萬';
+  return v.toLocaleString();
+}
+function fmtN(v) { return Math.round(v).toLocaleString(); }
+function fmtC(v) {
+  v = Math.round(v);
+  if (Math.abs(v) >= 100000000) return (v/100000000).toFixed(2) + '億';
+  if (Math.abs(v) >= 10000)     return (v/10000).toFixed(1) + '萬';
+  return v.toLocaleString();
+}
+
+function calc() {
+  readInputs();
+  const p = S.amount;
+  if (!p || p <= 0 || !S.rate || S.years < 1) return;
+
+  const rows    = buildAmort();
+  const upfront = getUpfrontFees();
+  const mf      = getMonthlyFees();
+  const n       = S.years * 12;
+
+  const cashflows = rows.map(r => r.payment);
+  const netLoan   = p - upfront;
+  const apr       = calcAPR(netLoan, cashflows);
+
+  const totalPayments    = cashflows.reduce((a, b) => a + b, 0);
+  const totalMonthlyFees = mf * n;
+  const totalInterest    = totalPayments - p - totalMonthlyFees;
+  const totalFees        = upfront + totalMonthlyFees;
+  const totalAmount      = totalPayments + upfront;
+
+  document.getElementById('placeholder').classList.add('hidden');
+  document.getElementById('results-area').classList.remove('hidden');
+
+  document.getElementById('apr-val').textContent = apr.toFixed(2);
+
+  const firstPay = rows[0] ? rows[0].payment : 0;
+  document.getElementById('monthly-val').textContent = fmtN(firstPay) + ' 元';
+
+  const repayLabel = { annuity: '等額本息', principal: '等額本金（首月最高）', bullet: '到期還款（利息）' }[S.repay];
+  document.getElementById('monthly-sub').textContent = repayLabel + (S.grace > 0 ? '（寬限期後）' : '');
+
+  const total3 = p + Math.max(0, totalInterest) + Math.max(0, totalFees);
+  document.getElementById('bar-p').style.width = (p / total3 * 100).toFixed(1) + '%';
+  document.getElementById('bar-i').style.width = (Math.max(0, totalInterest) / total3 * 100).toFixed(1) + '%';
+  document.getElementById('bar-f').style.width = (Math.max(0, totalFees) / total3 * 100).toFixed(1) + '%';
+
+  document.getElementById('bk-principal').textContent = fmtC(p);
+  document.getElementById('bk-interest').textContent  = fmtC(totalInterest);
+  document.getElementById('bk-fees').textContent      = fmtC(totalFees);
+  document.getElementById('bk-total').textContent     = fmtC(totalAmount);
+
+  const graceBox = document.getElementById('grace-box');
+  if (S.grace > 0) {
+    graceBox.classList.remove('hidden');
+    document.getElementById('grace-m').textContent = S.grace;
+    document.getElementById('grace-pay').textContent = fmtN(p * S.rate / 100 / 12);
+    document.getElementById('grace-remain').textContent = n - S.grace;
+  } else {
+    graceBox.classList.add('hidden');
+  }
+
+  const floatBox = document.getElementById('floating-box');
+  if (S.rateType === 'floating') {
+    floatBox.classList.remove('hidden');
+    document.getElementById('float-change').textContent = S.rateChange.toFixed(2);
+  } else {
+    floatBox.classList.add('hidden');
+  }
+
+  const prepayInfo = document.getElementById('prepay-info');
+  if (S.prepayPct > 0) {
+    prepayInfo.style.display = '';
+    document.getElementById('prepay-years-d').textContent = S.prepayYears;
+    document.getElementById('prepay-pct-d').textContent = S.prepayPct.toFixed(1);
+  } else {
+    prepayInfo.style.display = 'none';
+  }
+
+  document.getElementById('apr-sub').textContent =
+    `依金管會IRR法計算，含所有費用 ｜ 共${n}期`;
+
+  allAmortRows = rows;
+  document.getElementById('total-rows').textContent = rows.length;
+  renderAmort(false);
+}
+
+function renderAmort(full) {
+  const rows = full ? allAmortRows : allAmortRows.slice(0, 24);
+  const tbody = document.getElementById('amort-body');
+  tbody.innerHTML = rows.map((r) => {
+    const cls = r.isGrace ? 'grace-row' : r.isLast ? 'last-row' : '';
+    return `<tr class="${cls}">
+      <td>${r.period}${r.isGrace ? ' ⏳' : ''}</td>
+      <td>${fmtN(r.payment)}</td>
+      <td class="principal-col">${r.principal > 1 ? fmtN(r.principal) : '—'}</td>
+      <td class="interest-col">${fmtN(r.interest)}</td>
+      <td class="fee-col">${r.fee > 0.5 ? fmtN(r.fee) : '—'}</td>
+      <td>${fmtN(r.balance)}</td>
+    </tr>`;
+  }).join('');
+
+  const btn = document.getElementById('show-more-btn');
+  btn.style.display = (!full && allAmortRows.length > 24) ? 'block' : 'none';
+}
+
+function showAllAmort() { renderAmort(true); }
+
+function toggleAmort() {
+  amortOpen = !amortOpen;
+  document.getElementById('amort-toggle').classList.toggle('open', amortOpen);
+  document.getElementById('amort-panel').classList.toggle('open', amortOpen);
+}
+
+function openModal() { document.getElementById('install-modal').classList.add('open'); }
+function closeModal() { document.getElementById('install-modal').classList.remove('open'); }
+function onModalBg(e) { if (e.target === document.getElementById('install-modal')) closeModal(); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.only-mortgage').forEach(el => el.style.display = '');
+  document.getElementById('grace-block').style.display = '';
+  calc();
+});
+</script>
+</body>
+</html>
